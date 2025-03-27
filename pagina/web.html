@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tu lista de ‘Likes’ y ‘No Likes’… ¡Aquí va todo!</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #e9ecef;
+        }
+        header {
+            background-color: #8a1721;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            margin: 0;
+        }
+        form {
+            background-color: rgba(255, 255, 255, 0.842);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 10px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .comments {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .category {
+            flex: 1;
+            margin: 0 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+        .comment-box {
+            border: 1px solid #ccc;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+            background-color: #fff;
+        }
+        .delete-button {
+            background-color: #dc3545;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .delete-button:hover {
+            background-color: #857b7c;
+        }
+        .print-button {
+            margin-top: 10px;
+            background-color: #ffe600;
+            border: none;
+            color: rgb(0, 0, 0);
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .print-button:hover {
+            background-color: #00b31e;
+        }
+        .qr-code {
+            text-align: center;
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Tu lista de ‘Likes’ y ‘No Likes’… ¡Aquí va todo!</h1>
+    </header>
+    
+    <div class="qr-code">
+        <h2>Escanea el código QR para dejar tus comentarios:</h2>
+        <img src="https://sogaray.github.io/paginasweb/pagina/scanme.jpeg" alt="Código QR para comentarios" style="width: 200px; height: auto;">
+    </div>
+
+    <form id="commentForm">
+        <div class="category">
+            <label for="category">Selecciona una categoría:</label>
+            <select id="category" required>
+                <option value="">--Selecciona--</option>
+                <option value="sugerencias">Sugerencias</option>
+                <option value="mejoras">Cosas a Mejorar</option>
+                <option value="gustos">Cosas que Me Gustan</option>
+            </select>
+        </div>
+        <label for="comment">Deja tu comentario:</label>
+        <textarea id="comment" placeholder="Deja tu comentario aquí... 😊" required></textarea>
+        <button type="submit">Enviar</button>
+    </form>
+
+    <div class="comments" id="commentsSection">
+        <div id="sugerencias" class="category">
+            <h3>Sugerencias</h3>
+            <div class="comments-list" id="sugerenciasList"></div>
+            <button class="print-button" onclick="printComments('sugerenciasList')">Imprimir Sugerencias</button>
+        </div>
+        <div id="mejoras" class="category">
+            <h3>Cosas a Mejorar</h3>
+            <div class="comments-list" id="mejorasList"></div>
+            <button class="print-button" onclick="printComments('mejorasList')">Imprimir Mejoras</button>
+        </div>
+        <div id="gustos" class="category">
+            <h3>Cosas que Me Gustan</h3>
+            <div class="comments-list" id="gustosList"></div>
+            <button class="print-button" onclick="printComments('gustosList')">Imprimir Gustos</button>
+        </div>
+    </div>
+
+    <script>
+        const commentForm = document.getElementById('commentForm');
+        const commentsListSugerencias = document.getElementById('sugerenciasList');
+        const commentsListMejoras = document.getElementById('mejorasList');
+        const commentsListGustos = document.getElementById('gustosList');
+
+        // Load comments from local storage
+        const loadComments = () => {
+            const comments = JSON.parse(localStorage.getItem('comments')) || [];
+            commentsListSugerencias.innerHTML = '';
+            commentsListMejoras.innerHTML = '';
+            commentsListGustos.innerHTML = '';
+
+            comments.forEach((comment, index) => {
+                const commentBox = document.createElement('div');
+                commentBox.className = 'comment-box';
+                commentBox.innerHTML = `
+                    <strong>${comment.category}:</strong> ${comment.text} <br>
+                    <small>Publicado el: ${comment.date}</small>
+                    <button class="delete-button" onclick="deleteComment(${index})">Eliminar</button>
+                `;
+
+                if (comment.category === 'sugerencias') {
+                    commentsListSugerencias.appendChild(commentBox);
+                } else if (comment.category === 'mejoras') {
+                    commentsListMejoras.appendChild(commentBox);
+                } else if (comment.category === 'gustos') {
+                    commentsListGustos.appendChild(commentBox);
+                }
+            });
+        };
+
+        // Save comment to local storage
+        const saveComment = (category, text) => {
+            const comments = JSON.parse(localStorage.getItem('comments')) || [];
+            const date = new Date().toLocaleString(); // Obtener la fecha actual
+            comments.push({ category, text, date });
+            localStorage.setItem('comments', JSON.stringify(comments));
+        };
+
+        // Handle form submission
+        commentForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const category = document.getElementById('category').value;
+            const text = document.getElementById('comment').value;
+
+            // Guardar el comentario en localStorage
+            saveComment(category, text);
+
+            // Limpiar el formulario
+            commentForm.reset();
+
+            // Cargar comentarios después de enviar
+            loadComments();
+        });
+
+        // Delete comment
+        const deleteComment = (index) => {
+            const comments = JSON.parse(localStorage.getItem('comments')) || [];
+            comments.splice(index, 1); // Eliminar el comentario
+            localStorage.setItem('comments', JSON.stringify(comments)); // Actualizar el almacenamiento
+            loadComments(); // Recargar los comentarios
+        };
+
+        // Print comments by category
+        const printComments = (listId) => {
+            const printContent = document.getElementById(listId).innerHTML;
+            const newWindow = window.open('', '', 'height=600,width=800');
+            newWindow.document.write('<html><head><title>Imprimir Comentarios</title>');
+            newWindow.document.write('</head><body>');
+            newWindow.document.write(printContent);
+            newWindow.document.write('</body></html>');
+            newWindow.document.close();
+            newWindow.print();
+        };
+
+        // Cargar comentarios al cargar la página
+        window.onload = loadComments;
+    </script>
+
+</body>
+</html>
