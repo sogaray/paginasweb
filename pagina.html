@@ -89,6 +89,10 @@
         .print-button:hover {
             background-color: #00b31e;
         }
+        .qr-code {
+            text-align: center;
+            margin: 20px;
+        }
     </style>
 </head>
 <body>
@@ -97,6 +101,11 @@
         <h1>Tu lista de ‘Likes’ y ‘No Likes’… ¡Aquí va todo!</h1>
     </header>
     
+    <div class="qr-code">
+        <h2>Escanea el código QR para dejar tus comentarios:</h2>
+        <img id="qrcode" src="https://api.qrserver.com/v1/create-qr-code/?data=https://tusitio.com/comentarios&size=200x200" alt="Código QR para comentarios">
+    </div>
+
     <form id="commentForm">
         <div class="category">
             <label for="category">Selecciona una categoría:</label>
